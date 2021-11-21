@@ -23,13 +23,16 @@ class DataProviderController extends Controller
     {
 
         $providers_files=Storage::disk('local')->allfiles('providers');
+
         foreach ($providers_files as $provider_file){
             $data=Storage::disk('local')->get($provider_file);
             $data=json_decode($data,true);
             $this->providers[]=["name"=>$provider_file,"columns"=>$data['columns'],
                           "StautsCode"=>$data['StautsCode'],"data"=>collect($data['transactaions'])];
         }
-
+        if(!is_array($this->providers)){
+            return $this->failure('No Json Provider files located in storage path please putted them in providers folder inside storage folder',422);
+        }
         if(isset($request->provider) && !in_array("providers/".$request->provider.".json", array_column($this->providers, 'name')))
         {
             return $this->failure("Provider Not Found",404);
